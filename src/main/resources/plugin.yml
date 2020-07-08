@@ -1,0 +1,3 @@
+name: KixBungeeBridge
+version: ${project.version}
+main: me.kixstar.kixbungeebridge.Kixbungeebridge
