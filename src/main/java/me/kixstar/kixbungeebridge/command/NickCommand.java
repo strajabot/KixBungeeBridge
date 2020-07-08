@@ -29,8 +29,8 @@ public class NickCommand extends Command {
             this.setNickname(player, nickname);
         }
         if(args.length == 2) {
-            if(args[0].equalsIgnoreCase("cl")) {
-                String playerName = args[1];
+            if(args[1].equalsIgnoreCase("cl")) {
+                String playerName = args[0];
                 ProxiedPlayer player = proxy.getPlayer(playerName);
                 if(player == null) return;
                 this.clearNickname(player);
