@@ -17,9 +17,18 @@ repositories {
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.12'
     compileOnly 'net.md-5:bungeecord-api:1.15-SNAPSHOT'
+    compileOnly 'com.rabbitmq:amqp-client:5.9.0'
 }
 
 import org.apache.tools.ant.filters.ReplaceTokens
+
+jar {
+    manifest {
+        attributes(
+                "Class-Path": "../lib/rabbitmq-client.jar"
+        )
+    }
+}
 
 processResources {
     from(sourceSets.main.resources.srcDirs) {
