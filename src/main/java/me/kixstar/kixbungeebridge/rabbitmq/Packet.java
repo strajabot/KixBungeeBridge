@@ -4,5 +4,5 @@ public interface Packet {
 
     byte[] serialize();
 
-    Packet deserialize(byte[] raw);
+    void deserialize(byte[] raw);
 }

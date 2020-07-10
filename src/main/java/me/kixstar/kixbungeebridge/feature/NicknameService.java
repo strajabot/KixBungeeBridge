@@ -1,5 +1,7 @@
 package me.kixstar.kixbungeebridge.feature;
 
+import me.kixstar.kixbungeebridge.rabbitmq.Packet;
+import me.kixstar.kixbungeebridge.rabbitmq.ProtocolChannelInput;
 import me.kixstar.kixbungeebridge.rabbitmq.ProtocolChannelOutput;
 import me.kixstar.kixbungeebridge.rabbitmq.RabbitMQ;
 import me.kixstar.kixbungeebridge.rabbitmq.nickname.NicknameChangePacket;
@@ -7,7 +9,11 @@ import me.kixstar.kixbungeebridge.rabbitmq.nickname.NicknameClearPacket;
 import me.kixstar.kixbungeebridge.rabbitmq.nickname.NicknameProtocol;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-public class NicknameService extends ProtocolChannelOutput {
+public class NicknameService {
+
+
+    private ProtocolChannelOutput PCO = new ProtocolChannelOutput(new NicknameProtocol());
+
 
     private static NicknameService instance = new NicknameService();
 
@@ -15,9 +21,7 @@ public class NicknameService extends ProtocolChannelOutput {
         return instance;
     }
 
-    private NicknameService() {
-        super(new NicknameProtocol());
-    }
+    private NicknameService() {}
 
     public boolean setNickname(ProxiedPlayer player, String nickname, boolean formatting) {
         if(!formatting) nickname = this.stripColorCodes(nickname);
@@ -30,7 +34,7 @@ public class NicknameService extends ProtocolChannelOutput {
                 nickname
         );
 
-        sendPacket(packet, playerUUID );
+        this.PCO.sendPacket(packet, playerUUID );
         return true;
     }
 
@@ -42,7 +46,7 @@ public class NicknameService extends ProtocolChannelOutput {
                 playerUUID
         );
 
-        sendPacket(packet, playerUUID);
+        this.PCO.sendPacket(packet, playerUUID);
     }
 
     public boolean validNickname(String nickname) {
@@ -75,10 +79,10 @@ public class NicknameService extends ProtocolChannelOutput {
     }
 
     public static void register() {
-        instance.bind(RabbitMQ.getChannel(), "nickname", "topic");
+        instance.PCO.bind(RabbitMQ.getChannel(), "nickname", "topic");
     }
 
     public static void unregister() {
-        instance.unbind();
+        instance.PCO.unbind();
     }
 }

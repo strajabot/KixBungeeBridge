@@ -1,7 +1,5 @@
 package me.kixstar.kixbungeebridge.command;
 
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 import me.kixstar.kixbungeebridge.KixBungeeBridge;
 import me.kixstar.kixbungeebridge.feature.NicknameService;
 import net.md_5.bungee.api.CommandSender;
@@ -21,8 +19,10 @@ public class NickCommand extends Command {
         ProxyServer proxy = KixBungeeBridge.getInstance().getProxy();
         if(!(sender instanceof ProxiedPlayer)) return;
         ProxiedPlayer player = (ProxiedPlayer) sender;
+
         boolean formatting = false;
         if(player.hasPermission("kix.utilities.nick.formatting")) formatting = true;
+
         if(args.length == 1) {
             if(!this.checkPermissions(player, player)) return;
             if(args[0].equalsIgnoreCase("cl")) {
@@ -32,6 +32,7 @@ public class NickCommand extends Command {
                 this.setNickname(player, nick, formatting);
             }
         }
+
         if(args.length == 2) {
             String playerName = args[0];
             ProxiedPlayer target = proxy.getPlayer(playerName);
@@ -43,12 +44,10 @@ public class NickCommand extends Command {
                 this.setNickname(target, args[1], formatting);
             }
         }
+
     }
 
     public boolean setNickname(ProxiedPlayer target, String nick, boolean formatting) {
-
-        if(!this.validNickname(nick)) return false;
-        if(!formatting) nick = this.stripColorCodes(nick);
 
         NicknameService service = NicknameService.get();
 
@@ -57,13 +56,10 @@ public class NickCommand extends Command {
     }
 
     public void clearNickname(ProxiedPlayer target) {
-        //prepare packet
-        ByteArrayDataOutput out = ByteStreams.newDataOutput();
-        out.writeUTF("NicknameClearEvent");
-        out.writeUTF(target.getUniqueId().toString());
 
-        //send packet
-        target.getServer().sendData("kixutilities:nickname", out.toByteArray());
+        NicknameService service =  NicknameService.get();
+
+        service.clearNickname(target);
 
     }
 
@@ -74,35 +70,6 @@ public class NickCommand extends Command {
             if(!player.hasPermission("kix.utilities.nick.target")) return false;
         }
         return true;
-    }
-
-    public String stripColorCodes(String nick) {
-        StringBuilder sb = new StringBuilder();
-        int i = 0;
-        while( i < nick.length()) {
-            char c = nick.charAt(i);
-            if(c == '&') {
-                //skip the next char too since color codes are formatted like "&a"
-                i++;
-            } else {
-                sb.append(c);
-            }
-            i++;
-        }
-        return sb.toString();
-    }
-
-    public boolean validNickname(String nickname) {
-        /*   Minecraft username info: https://help.mojang.com/customer/en/portal/articles/928638-minecraft-usernames
-         *
-         *  -Usernames can consist of the whole English Alphabet
-         *  -Usernames can consist of all digits
-         *  -Out of all special characters usernames can only use the underscore
-         *  -Usernames mustn't be shorter than 3 characters
-         *  -Usernames mustn't be longer than 16 characters
-         */
-        String usernameRegex = "/^[a-zA-Z0-9_]{3,16}$/";
-        return nickname.matches(usernameRegex);
     }
 
 }

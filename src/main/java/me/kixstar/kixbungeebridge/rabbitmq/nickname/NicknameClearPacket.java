@@ -25,11 +25,8 @@ public class NicknameClearPacket implements Packet {
     }
 
     @Override
-    public NicknameClearPacket deserialize(byte[] raw) {
+    public void deserialize(byte[] raw) {
         ByteArrayDataInput in  = ByteStreams.newDataInput(raw);
-        return new NicknameClearPacket(
-                in.readUTF()
-        );
-
+        this.playerUUID = in.readUTF();
     }
 }

@@ -28,12 +28,10 @@ public class NicknameChangePacket implements Packet {
     }
 
     @Override
-    public NicknameChangePacket deserialize(byte[] raw) {
+    public void deserialize(byte[] raw) {
         ByteArrayDataInput in = ByteStreams.newDataInput(raw);
-        return new NicknameChangePacket(
-                in.readUTF(),
-                in.readUTF()
-        );
+        this.playerUUID = in.readUTF();
+        this.nickname = in.readUTF();
     }
 
 }
