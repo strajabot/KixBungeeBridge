@@ -53,7 +53,7 @@ public class NicknameService {
          *  -Usernames mustn't be shorter than 3 characters
          *  -Usernames mustn't be longer than 16 characters
          */
-        String usernameRegex = "/^[a-zA-Z0-9_]{3,16}$/";
+        String usernameRegex = "^[a-zA-Z0-9_]{3,16}$";
         return nickname.matches(usernameRegex);
     }
 
