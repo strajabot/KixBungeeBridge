@@ -7,26 +7,13 @@ import me.kixstar.kixbungeebridge.rabbitmq.Packet;
 
 public class NicknameClearPacket extends Packet {
 
-    private String playerUUID;
-
     //no args constructor is required for deserialization of packets
     public NicknameClearPacket() {}
 
-    public NicknameClearPacket(String playerUUID) {
-        this.playerUUID = playerUUID;
-    }
+    @Override
+    public byte[] serialize() { return new byte[]{(byte) 1}; }
 
     @Override
-    public byte[] serialize() {
-        ByteArrayDataOutput out = ByteStreams.newDataOutput();
-        out.writeUTF(this.playerUUID);
+    public void deserialize(byte[] raw) {}
 
-        return out.toByteArray();
-    }
-
-    @Override
-    public void deserialize(byte[] raw) {
-        ByteArrayDataInput in  = ByteStreams.newDataInput(raw);
-        this.playerUUID = in.readUTF();
-    }
 }

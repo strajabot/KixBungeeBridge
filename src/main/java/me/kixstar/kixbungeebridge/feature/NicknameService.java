@@ -21,7 +21,7 @@ public class NicknameService {
         return instance;
     }
 
-    private NicknameService() {}
+    NicknameService() {}
 
     public boolean setNickname(ProxiedPlayer player, String nickname, boolean formatting) {
         if(!formatting) nickname = this.stripColorCodes(nickname);
@@ -29,10 +29,7 @@ public class NicknameService {
 
         String playerUUID = player.getUniqueId().toString();
 
-        NicknameChangePacket packet = new NicknameChangePacket(
-                playerUUID,
-                nickname
-        );
+        NicknameChangePacket packet = new NicknameChangePacket(nickname);
 
         this.PCO.sendPacket(packet, playerUUID );
         return true;
@@ -42,9 +39,7 @@ public class NicknameService {
 
         String playerUUID = player.getUniqueId().toString();
 
-        NicknameClearPacket packet  = new NicknameClearPacket(
-                playerUUID
-        );
+        NicknameClearPacket packet  = new NicknameClearPacket();
 
         this.PCO.sendPacket(packet, playerUUID);
     }
