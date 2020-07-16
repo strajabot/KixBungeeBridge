@@ -25,7 +25,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 jar {
     manifest {
         attributes(
-                "Class-Path": "../lib/rabbitmq-client.jar"
+                "Class-Path": "../lib/slf4j-api.jar ../lib/rabbitmq-client.jar"
         )
     }
 }
