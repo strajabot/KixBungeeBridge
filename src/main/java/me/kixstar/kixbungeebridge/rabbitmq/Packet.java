@@ -1,8 +1,20 @@
 package me.kixstar.kixbungeebridge.rabbitmq;
 
-public interface Packet {
+import com.rabbitmq.client.AMQP;
 
-    byte[] serialize();
+public abstract class  Packet {
 
-    void deserialize(byte[] raw);
+    private AMQP.BasicProperties props;
+
+    public abstract byte[] serialize();
+
+    public abstract void deserialize(byte[] raw);
+
+    public AMQP.BasicProperties getProperties() {
+        return this.props;
+    }
+
+    public void setProperties(AMQP.BasicProperties props) {
+        this.props = props;
+    }
 }

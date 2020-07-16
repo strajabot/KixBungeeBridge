@@ -5,7 +5,7 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import me.kixstar.kixbungeebridge.rabbitmq.Packet;
 
-public class NicknameClearPacket implements Packet {
+public class NicknameClearPacket extends Packet {
 
     private String playerUUID;
 

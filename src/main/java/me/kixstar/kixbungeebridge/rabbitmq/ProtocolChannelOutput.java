@@ -43,7 +43,7 @@ public class ProtocolChannelOutput {
 
     public void sendPacket(Packet packet, String route) {
         try {
-            channel.basicPublish(exchange, route, null, proto.serailize(packet));
+            channel.basicPublish(exchange, route, packet.getProperties(), proto.serailize(packet));
         } catch (IOException e) {
             e.printStackTrace();
         }

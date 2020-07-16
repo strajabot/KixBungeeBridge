@@ -35,6 +35,7 @@ public abstract class ProtocolChannelInput {
             this.channel.queueBind(this.queue, this.exchange, this.route);
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
                 Packet packet = this.proto.deserialize(delivery.getBody());
+                packet.setProperties(delivery.getProperties());
                 this.onPacket(packet);
             };
             this.channel.basicConsume(queue, true, deliverCallback, (consumertag) -> {});
