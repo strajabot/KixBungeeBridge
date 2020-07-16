@@ -56,12 +56,12 @@ public class CustomProtocol {
     }
 
     public byte[] serailize(Packet packet) {
-        if (!this.packets.containsValue(packet)) return null;
+        if (!this.packets.containsValue(packet.getClass())) return null;
         ByteArrayDataOutput frame = ByteStreams.newDataOutput();
 
         byte[] raw  = packet.serialize();
 
-        frame.writeUTF(this.packets.inverse().get(packet));
+        frame.writeUTF(this.packets.inverse().get(packet.getClass()));
         frame.writeInt(raw.length);
         frame.write(raw);
 
