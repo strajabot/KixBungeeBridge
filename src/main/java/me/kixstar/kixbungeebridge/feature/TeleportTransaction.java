@@ -1,10 +1,8 @@
 package me.kixstar.kixbungeebridge.feature;
 
-import com.rabbitmq.client.AMQP;
 import me.kixstar.kixbungeebridge.KixBungeeBridge;
 import me.kixstar.kixbungeebridge.rabbitmq.*;
 import me.kixstar.kixbungeebridge.rabbitmq.teleport.*;
-import net.md_5.bungee.api.Callback;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -14,8 +12,6 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.event.EventHandler;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -169,8 +165,6 @@ public class TeleportTransaction implements Listener {
     public void fakeCancel() {
         Packet packet = new CancelTeleportPacket();
 
-        packet.setProperties(this.getDefaultProps());
-
         PCO.sendPacket(packet, this.transactionID);
     }
 
@@ -200,8 +194,6 @@ public class TeleportTransaction implements Listener {
             );
         }
 
-        packet.setProperties(this.getDefaultProps());
-
         PCO.sendPacket(packet, this.transactionID);
 
     }
@@ -218,15 +210,6 @@ public class TeleportTransaction implements Listener {
         });
 
         return cb;
-    }
-
-    //make this modular
-    private AMQP.BasicProperties getDefaultProps() {
-        Map<String, Object> headers = new HashMap<>();
-        headers.put("origin", "bungee");
-        return new AMQP.BasicProperties.Builder()
-                .headers(headers)
-                .build();
     }
 
     public static void register() {

@@ -39,6 +39,8 @@ public class ProtocolChannelOutput {
 
     public void sendPacket(Packet packet, String route) {
         try {
+            if(!RabbitMQ.setOrigin(packet))
+                throw new RuntimeException("Couldn't set packet's \"origin\" header, packet will be ignored");
             channel.basicPublish(exchange, route, packet.getProperties(), proto.serialize(packet));
         } catch (IOException e) {
             e.printStackTrace();
