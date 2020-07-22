@@ -55,7 +55,7 @@ public class CustomProtocol {
         return null;
     }
 
-    public byte[] serailize(Packet packet) {
+    public byte[] serialize(Packet packet) {
         if (!this.packets.containsValue(packet.getClass())) return null;
         ByteArrayDataOutput frame = ByteStreams.newDataOutput();
 
