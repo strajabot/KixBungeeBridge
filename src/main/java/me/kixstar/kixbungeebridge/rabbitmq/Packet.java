@@ -11,6 +11,7 @@ public abstract class  Packet {
     public abstract void deserialize(byte[] raw);
 
     public AMQP.BasicProperties getProperties() {
+        if(props == null) this.setProperties(new AMQP.BasicProperties().builder().build());
         return this.props;
     }
 

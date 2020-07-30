@@ -6,17 +6,25 @@ import me.kixstar.kixbungeebridge.feature.ServerCommandService;
 import me.kixstar.kixbungeebridge.feature.TeleportTransaction;
 import me.kixstar.kixbungeebridge.rabbitmq.RabbitMQ;
 import net.md_5.bungee.api.plugin.Plugin;
+import net.md_5.bungee.config.Configuration;
+import net.md_5.bungee.config.ConfigurationProvider;
+import net.md_5.bungee.config.YamlConfiguration;
+
+import java.io.File;
+import java.io.IOException;
 
 public final class KixBungeeBridge extends Plugin {
 
     private static KixBungeeBridge plugin;
+
+    private static Configuration config;
 
     @Override
     public void onEnable() {
         plugin = this;
 
         //connect to RabbitMQ
-        RabbitMQ.bind();
+        RabbitMQ.bind(Config.getServerHandle());
 
         //connect services that depend on RabbitMQ
         NicknameService.register();
