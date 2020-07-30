@@ -30,9 +30,19 @@ public abstract class ProtocolChannelInput {
         this.exchange = exchange;
         this.route = routingKey;
         try {
-            this.channel.exchangeDeclare(this.exchange, type);
-            this.queue = this.channel.queueDeclare().getQueue();
-            this.channel.queueBind(this.queue, this.exchange, this.route);
+            if(this.exchange.equals("")) {
+                this.queue = this.channel.queueDeclare(
+                        routingKey,
+                        false,
+                        true,
+                        true,
+                        null
+                ).getQueue();
+            } else {
+                this.queue = this.channel.queueDeclare().getQueue();
+                this.channel.exchangeDeclare(this.exchange, type);
+                this.channel.queueBind(this.queue, this.exchange, this.route);
+            }
             DeliverCallback deliverCallback = (consumerTag, delivery) -> {
                 Packet packet = this.proto.deserialize(delivery.getBody());
                 packet.setProperties(delivery.getProperties());
@@ -46,7 +56,7 @@ public abstract class ProtocolChannelInput {
 
     public void unbind() {
         try {
-            this.channel.queueUnbind(this.queue, this.exchange, this.route);
+            if(!this.exchange.equals("")) this.channel.queueUnbind(this.queue, this.exchange, this.route);
             this.channel.queueDelete(this.queue);
             this.channel = null;
             this.route = null;

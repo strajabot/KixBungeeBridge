@@ -12,10 +12,6 @@ public class ProtocolChannelOutput {
 
     private String exchange;
 
-    public ProtocolChannelOutput() {
-        this(new CustomProtocol());
-    }
-
     public ProtocolChannelOutput(CustomProtocol proto) {
         this.proto = proto;
     }
@@ -24,7 +20,7 @@ public class ProtocolChannelOutput {
         this.channel = channel;
         this.exchange = exchange;
         try {
-            this.channel.exchangeDeclare(this.exchange, type);
+            if(!this.exchange.equals("")) this.channel.exchangeDeclare(this.exchange, type);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -32,7 +28,7 @@ public class ProtocolChannelOutput {
 
     public void unbind() {
         try {
-            this.channel.exchangeDelete(this.exchange, false);
+            if(!this.exchange.equals("")) this.channel.exchangeDelete(this.exchange, true);
             this.channel = null;
             this.exchange = null;
 
@@ -43,7 +39,7 @@ public class ProtocolChannelOutput {
 
     public void sendPacket(Packet packet, String route) {
         try {
-            channel.basicPublish(exchange, route, packet.getProperties(), proto.serailize(packet));
+            channel.basicPublish(exchange, route, packet.getProperties(), proto.serialize(packet));
         } catch (IOException e) {
             e.printStackTrace();
         }
