@@ -1,8 +1,5 @@
 package me.kixstar.kixbungeebridge.rabbitmq.nickname;
 
-import com.google.common.io.ByteArrayDataInput;
-import com.google.common.io.ByteArrayDataOutput;
-import com.google.common.io.ByteStreams;
 import me.kixstar.kixbungeebridge.rabbitmq.Packet;
 
 public class NicknameClearPacket extends Packet {

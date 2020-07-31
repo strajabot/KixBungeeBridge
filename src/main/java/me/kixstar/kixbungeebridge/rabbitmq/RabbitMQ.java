@@ -1,14 +1,14 @@
 package me.kixstar.kixbungeebridge.rabbitmq;
 
-import com.rabbitmq.client.Channel;
-import com.rabbitmq.client.Connection;
-import com.rabbitmq.client.ConnectionFactory;
+import com.rabbitmq.client.*;
 import me.kixstar.kixbungeebridge.Config;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
@@ -20,18 +20,33 @@ public class RabbitMQ {
 
     private static String originHeader;
 
+    public static String getOrigin() {
+        return originHeader;
+    }
+
+    public static String getOrigin(Packet packet) throws UnknownPacketOriginException {
+        Object origin = packet.getProperties().getHeaders().get("origin");
+        if(origin == null) throw new UnknownPacketOriginException();
+        try {
+            return new String(((LongString) origin).getBytes(), "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+            throw new UnknownPacketOriginException();
+        }
+    }
+
     public static boolean setOrigin(Packet packet) {
         if(originHeader == null) return false;
-        Map<String, Object> headers = packet.getProperties().getHeaders();
-        headers.put("origin", originHeader);
+        AMQP.BasicProperties oldProperties = packet.getProperties();
+        Map<String, Object> oldHeaders = oldProperties.getHeaders();
+        Map<String, Object> newHeaders = oldHeaders == null? new HashMap() : new HashMap<>(oldHeaders);
+        newHeaders.put("origin", originHeader);
+        AMQP.BasicProperties newProperties = oldProperties.builder().headers(newHeaders).build();
+        packet.setProperties(newProperties);
         return true;
     }
 
-    public static String isFromThisServer(Packet packet) throws UnknownPacketOriginException {
-        Object origin = packet.getProperties().getHeaders().get("origin");
-        if(origin == null) throw new UnknownPacketOriginException();
-        if(!(origin instanceof String)) throw new UnknownPacketOriginException();
-        return (String) origin;
+    public static boolean isFromThisServer(Packet packet) throws UnknownPacketOriginException {
+        return getOrigin(packet).equals(originHeader);
     }
 
     public static void bind(String serverHandle) {
