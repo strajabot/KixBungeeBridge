@@ -1,4 +1,4 @@
-package me.kixstar.kixbungeebridge.rabbitmq;
+package me.kixstar.kixbungeebridge;
 
 public class Location {
 

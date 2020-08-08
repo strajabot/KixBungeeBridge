@@ -2,7 +2,6 @@ package me.kixstar.kixbungeebridge.command;
 
 import me.kixstar.kixbungeebridge.KixBungeeBridge;
 import me.kixstar.kixbungeebridge.feature.teleport.TeleportTransaction;
-import me.kixstar.kixbungeebridge.rabbitmq.Location;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;

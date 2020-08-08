@@ -2,14 +2,13 @@ package me.kixstar.kixbungeebridge.feature.teleport;
 
 import com.rabbitmq.client.AMQP;
 import me.kixstar.kixbungeebridge.KixBungeeBridge;
+import me.kixstar.kixbungeebridge.Location;
 import me.kixstar.kixbungeebridge.feature.ServerCommandService;
 import me.kixstar.kixbungeebridge.rabbitmq.*;
 import me.kixstar.kixbungeebridge.rabbitmq.teleport.*;
-import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
-import net.md_5.bungee.api.event.ServerDisconnectEvent;
 import net.md_5.bungee.api.event.ServerSwitchEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.api.plugin.Plugin;
