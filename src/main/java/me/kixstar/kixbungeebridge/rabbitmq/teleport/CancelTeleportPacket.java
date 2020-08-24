@@ -33,4 +33,8 @@ public class CancelTeleportPacket extends Packet {
 
     }
 
+    public String getReason() {
+        return reason;
+    }
+
 }

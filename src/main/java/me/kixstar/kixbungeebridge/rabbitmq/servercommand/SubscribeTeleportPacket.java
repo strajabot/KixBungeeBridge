@@ -3,7 +3,6 @@ package me.kixstar.kixbungeebridge.rabbitmq.servercommand;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import com.rabbitmq.client.AMQP;
 import me.kixstar.kixbungeebridge.rabbitmq.Packet;
 
 public class SubscribeTeleportPacket extends Packet {

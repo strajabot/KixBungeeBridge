@@ -49,7 +49,7 @@ public class ServerCommandService {
 
     //completes with false if the server is deemed unreachable or if the server returns a negative status.
     public CompletableFuture<Boolean> subscribeTeleport(String transactionID, String serverName) {
-        final String correlationId = UUID.randomUUID().toString();
+        String correlationId = UUID.randomUUID().toString();
         AMQP.BasicProperties props = new AMQP.BasicProperties.Builder()
                 .correlationId(correlationId)
                 .replyTo(RESPONSE_ROUTE)
@@ -66,7 +66,6 @@ public class ServerCommandService {
             CompletableFuture<Boolean> reqFail  = this.correlationCBMap.remove(correlationId);
             if(reqFail != null) reqFail.complete(false);
         }, 10, TimeUnit.SECONDS);
-
         return  callback;
     }
 
