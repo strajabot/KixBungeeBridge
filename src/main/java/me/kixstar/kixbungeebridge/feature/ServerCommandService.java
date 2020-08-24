@@ -3,6 +3,7 @@ package me.kixstar.kixbungeebridge.feature;
 import com.rabbitmq.client.AMQP;
 import me.kixstar.kixbungeebridge.KixBungeeBridge;
 import me.kixstar.kixbungeebridge.rabbitmq.*;
+import me.kixstar.kixbungeebridge.rabbitmq.servercommand.CommandStatusPacket;
 import me.kixstar.kixbungeebridge.rabbitmq.servercommand.ServerCommandProtocol;
 import me.kixstar.kixbungeebridge.rabbitmq.servercommand.SubscribeTeleportPacket;
 import net.md_5.bungee.api.connection.Server;
@@ -24,12 +25,15 @@ public class ServerCommandService {
     private ProtocolChannelInput PCI = new ProtocolChannelInput(new ServerCommandProtocol()) {
         @Override
         public void onPacket(Packet in) {
-            if(in instanceof SubscribeTeleportPacket) {
-                SubscribeTeleportPacket packet = (SubscribeTeleportPacket) in;
-                String correlationID = packet.getProperties().getCorrelationId();
-                if(correlationID == null) return;
-                correlationCBMap.remove(correlationID).complete(true);
-            }
+            String correlationID = in.getProperties().getCorrelationId();
+            if(correlationID == null) return;
+
+            CompletableFuture<Boolean> reqSuccess = correlationCBMap.remove(correlationID);
+            if(reqSuccess == null) return;
+
+            CommandStatusPacket packet = (CommandStatusPacket) in;
+
+            reqSuccess.complete(packet.getStatus());
         }
     };
 
@@ -43,6 +47,7 @@ public class ServerCommandService {
 
     private ServerCommandService() {}
 
+    //completes with false if the server is deemed unreachable or if the server returns a negative status.
     public CompletableFuture<Boolean> subscribeTeleport(String transactionID, String serverName) {
         final String correlationId = UUID.randomUUID().toString();
         AMQP.BasicProperties props = new AMQP.BasicProperties.Builder()
@@ -58,8 +63,8 @@ public class ServerCommandService {
         TaskScheduler scheduler = plugin.getProxy().getScheduler();
         scheduler.schedule(plugin, () -> {
             //if the server doesn't respond in 10 seconds return false to CompletableFuture;
-            CompletableFuture<Boolean> subscribeFailed  = this.correlationCBMap.remove(correlationId);
-            if(subscribeFailed != null) subscribeFailed.complete(false);
+            CompletableFuture<Boolean> reqFail  = this.correlationCBMap.remove(correlationId);
+            if(reqFail != null) reqFail.complete(false);
         }, 10, TimeUnit.SECONDS);
 
         return  callback;
