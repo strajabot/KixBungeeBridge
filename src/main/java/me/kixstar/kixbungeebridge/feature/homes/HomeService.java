@@ -3,16 +3,17 @@ package me.kixstar.kixbungeebridge.feature.homes;
 import com.google.common.base.Preconditions;
 import me.kixstar.kixbungeebridge.KixBungeeBridge;
 import me.kixstar.kixbungeebridge.Location;
-import me.kixstar.kixbungeebridge.mongodb.player.KixPlayer;
-import me.kixstar.kixbungeebridge.mongodb.player.KixPlayerData;
+import me.kixstar.kixbungeebridge.mongodb.abstraction.DatabaseLock;
+import me.kixstar.kixbungeebridge.mongodb.abstraction.player.KixPlayer;
+import me.kixstar.kixbungeebridge.mongodb.entities.Home;
+import me.kixstar.kixbungeebridge.mongodb.entities.KixPlayerData;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.cacheddata.CachedMetaData;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.query.QueryOptions;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class HomeService {
@@ -29,34 +30,84 @@ public class HomeService {
         Preconditions.checkNotNull(homeName, "Argument \"homeName\" can't be null");
         Preconditions.checkNotNull(location, "Argument \"location\" can't be null");
 
-        KixPlayer kixPlayer = KixPlayer.getPlayer(playerUUID);
+        KixPlayer kixPlayer = KixPlayer.get(playerUUID);
+
+        final DatabaseLock<KixPlayerData> playerLock = kixPlayer.writeLock();
 
         CompletableFuture<Void> setHomeFuture = CompletableFuture.runAsync(() -> {
-            kixPlayer.lock();
+            playerLock.lock();
             KixPlayerData playerData = kixPlayer.getData();
             int maxHomes = getMaxHomes(playerUUID);
-            Map<String, Location> homes = playerData.getHomes();
-            //no need to check number of homes when setting the "default" home or if an existing home is edited
-            if(homeName == "default" || homes.containsKey(homeName))  {
-                homes.put(homeName, location);
+            List<Home> homes = playerData.getHomes();
+            ListIterator<Home> iterator = homes.listIterator();
+
+            while(iterator.hasNext()) {
+                Home home = iterator.next();
+                if(!home.getName().equals(homeName)) continue;
+                //replace the old home with new one
+                iterator.set(new Home(homeName, location));
+                //update the local cache and then trigger an update to the database
                 playerData.setHomes(homes);
                 kixPlayer.updateData();
                 return;
             }
-            if(homes.size() + 1 > maxHomes) throw new HomeSlotsMaxedException(playerUUID, homeName);
-            homes.put(homeName, location);
+
+            if(homes.size() + 1 > maxHomes)throw new HomeSlotsMaxedException(playerUUID, homeName);
+            homes.add(new Home(homeName, location));
+            //update the local cache and then trigger an update to the database
             playerData.setHomes(homes);
             kixPlayer.updateData();
             return;
         });
 
-        setHomeFuture.whenComplete((r,t) -> {
+        setHomeFuture.whenComplete((r, t) -> {
             //unlock the object even if the update completes exceptionally
-            kixPlayer.unlock();
+            playerLock.unlock();
         });
 
         return setHomeFuture;
 
+    }
+
+    @NotNull
+    public static CompletableFuture<Void> deleteHome(
+            @NotNull String playerUUID,
+            @NotNull String homeName
+    ) {
+        Preconditions.checkNotNull(playerUUID, "Argument \"playerUUID\" can't be null");
+        Preconditions.checkNotNull(homeName, "Argument \"homeName\" can't be null");
+
+        KixPlayer kixPlayer = KixPlayer.get(playerUUID);
+
+        final DatabaseLock<KixPlayerData> playerLock = kixPlayer.writeLock();
+
+        CompletableFuture<Void> deleteHomeFuture = CompletableFuture.runAsync(() -> {
+            playerLock.lock();
+            KixPlayerData playerData = kixPlayer.getData();
+            List<Home> homes = playerData.getHomes();
+            ListIterator<Home> iterator = homes.listIterator();
+
+            while(iterator.hasNext()) {
+                Home home = iterator.next();
+                if(!home.getName().equals(homeName)) continue;
+                //remove the home
+                iterator.remove();
+                //update the local cache and then trigger an update to the database
+                playerData.setHomes(homes);
+                kixPlayer.updateData();
+                return;
+            }
+            //runs only if home couldn't be found
+            throw new HomeNotExistException(playerUUID, homeName);
+
+        });
+
+        deleteHomeFuture.whenComplete((result, ex) ->
+                //unlock the object even if the update completes exceptionally
+                playerLock.unlock()
+        );
+
+        return deleteHomeFuture;
     }
 
     /**
@@ -75,19 +126,26 @@ public class HomeService {
         Preconditions.checkNotNull(playerUUID, "Argument \"playerUUID\" can't be null");
         Preconditions.checkNotNull(homeName, "Argument \"homeName\" can't be null");
 
-        KixPlayer kixPlayer = KixPlayer.getPlayer(playerUUID);
+        KixPlayer kixPlayer = KixPlayer.get(playerUUID);
+
+        final DatabaseLock<KixPlayerData> playerLock = kixPlayer.readLock();
 
         CompletableFuture<Location> getHomeFuture = CompletableFuture.supplyAsync(() -> {
-            kixPlayer.lock();
+            playerLock.lock();
             KixPlayerData playerData = kixPlayer.getData();
-            //todo: probably should implement read/write lock instead of a simple lock to improve read performance at some point
-            Map<String, Location> homes = playerData.getHomes();
-            return homes.get(homeName);
+            List<Home> homes = playerData.getHomes();
+            ListIterator<Home> iterator = homes.listIterator();
+
+            while(iterator.hasNext()) {
+                Home home = iterator.next();
+                if(home.getName().equals(homeName)) return home.getLocation();
+            }
+            return null;
         });
 
         getHomeFuture.whenComplete((result, ex) -> {
             //unlock the object even if the update completes exceptionally
-            kixPlayer.unlock();
+            playerLock.unlock();
         });
 
         return getHomeFuture;
@@ -103,15 +161,17 @@ public class HomeService {
      * @return CompletableFuture
      */
     @NotNull
-    public static CompletableFuture<Map<String, Location>> getHomes(
+    public static CompletableFuture<List<Home>> getHomes(
             @NotNull String playerUUID
     ) {
         Preconditions.checkNotNull(playerUUID, "Argument \"playerUUID\" can't be null");
 
-        KixPlayer kixPlayer = KixPlayer.getPlayer(playerUUID);
+        KixPlayer kixPlayer = KixPlayer.get(playerUUID);
 
-        CompletableFuture<Map<String, Location>> getHomesFuture = CompletableFuture.supplyAsync(() -> {
-            kixPlayer.lock();
+        final DatabaseLock<KixPlayerData> playerLock = kixPlayer.readLock();
+
+        CompletableFuture<List<Home>> getHomesFuture = CompletableFuture.supplyAsync(() -> {
+            playerLock.lock();
             KixPlayerData playerData = kixPlayer.getData();
             //todo: probably should implement read/write lock instead of a simple lock to improve read performance at some point
             return playerData.getHomes();
@@ -119,7 +179,7 @@ public class HomeService {
 
         getHomesFuture.whenComplete((result, ex) -> {
             //unlock the object even if the update completes exceptionally
-            kixPlayer.unlock();
+            playerLock.unlock();
         });
 
         return getHomesFuture;

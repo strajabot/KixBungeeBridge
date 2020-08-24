@@ -1,18 +1,17 @@
 package me.kixstar.kixbungeebridge;
 
 import com.google.common.base.Preconditions;
-import me.kixstar.kixbungeebridge.command.HomeCommand;
+import me.kixstar.kixbungeebridge.command.home.HomeCommand;
 import me.kixstar.kixbungeebridge.command.NickCommand;
 import me.kixstar.kixbungeebridge.command.TpCommand;
 import me.kixstar.kixbungeebridge.feature.NicknameService;
 import me.kixstar.kixbungeebridge.feature.ServerCommandService;
 import me.kixstar.kixbungeebridge.feature.teleport.TeleportTransaction;
-import me.kixstar.kixbungeebridge.mongodb.MongoDB;
+import me.kixstar.kixbungeebridge.mongodb.Database;
 import me.kixstar.kixbungeebridge.rabbitmq.RabbitMQ;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.md_5.bungee.api.plugin.Plugin;
-import net.md_5.bungee.config.Configuration;
 
 public final class KixBungeeBridge extends Plugin {
 
@@ -28,7 +27,7 @@ public final class KixBungeeBridge extends Plugin {
         Preconditions.checkNotNull(luckPerms, "This plugin depends on LuckPerms to run");
 
         //connect to MongoDB
-        MongoDB.bind();
+        Database.bind();
         //connect to RabbitMQ
         RabbitMQ.bind(Config.getServerHandle());
 

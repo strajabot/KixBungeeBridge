@@ -1,4 +1,4 @@
-package me.kixstar.kixbungeebridge.command;
+package me.kixstar.kixbungeebridge.command.home;
 
 import com.google.common.base.Preconditions;
 import me.kixstar.kixbungeebridge.KixBungeeBridge;
@@ -53,7 +53,7 @@ public class HomeCommand extends Command {
             return;
         }
         ProxiedPlayer player = (ProxiedPlayer) sender;
-
+        //todo: improve error handling
         if (args.length == 0) {
             selfTeleport(player, "default");
         } else if (args.length == 1) {
@@ -148,7 +148,6 @@ public class HomeCommand extends Command {
         Preconditions.checkNotNull(throwable, "Argument \"throwable\" can't be null");
 
         String formattedStackTrace = this.getFormattedTrace(throwable);
-        this.log(Level.SEVERE, formattedStackTrace);
 
         TextComponent stackTrace = new TextComponent();
         stackTrace.setText(formattedStackTrace);
@@ -158,6 +157,8 @@ public class HomeCommand extends Command {
         errMessage.setColor(ChatColor.DARK_RED);
         errMessage.addExtra(stackTrace);
         errMessage.addExtra("\nPlease report to staff as soon as possible");
+
+        this.log(Level.SEVERE, errMessage.toString());
 
         player.sendMessage(errMessage);
         return;

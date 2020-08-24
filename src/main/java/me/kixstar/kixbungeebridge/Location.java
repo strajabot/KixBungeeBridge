@@ -1,8 +1,20 @@
 package me.kixstar.kixbungeebridge;
 
+import com.google.common.base.Preconditions;
+import org.jetbrains.annotations.NotNull;
+
+import javax.persistence.Column;
+import javax.persistence.Embeddable;
+
+@Embeddable
 public class Location {
 
+    @NotNull
+    @Column(name = "server-name", nullable = false)
     private String serverName;
+
+    @NotNull
+    @Column(name = "world-name", nullable = false)
     private String worldName;
 
     private double x;
@@ -12,17 +24,19 @@ public class Location {
     private double yaw;
     private double pitch;
 
-    Location() { }
+    private Location() { }
 
     public Location(
-            String serverName,
-            String worldName,
+            @NotNull String serverName,
+            @NotNull String worldName,
             double x,
             double y,
             double z,
-            double yaw,
-            double pitch
+            float yaw,
+            float pitch
     ) {
+        Preconditions.checkNotNull(serverName, "Argument \"serverName\" can't be null");
+        Preconditions.checkNotNull(worldName, "Argument \"worldName\" can't be null");
         this.serverName = serverName;
         this.worldName = worldName;
         this.x = x;

@@ -44,7 +44,15 @@ public class Config {
         throw new RuntimeException("Property \"server-handle\" must be provided in the config.yml so the plugin can function properly");
     }
 
-    public static String getMongoDB() {
-        return getConfig().getString("mongo-db", "mongodb://admin:root@localhost:27017");
+    public static String getMongoDBUsername() {
+        return getConfig().get("mongo-db.username", "admin");
+    }
+
+    public static String getMongoDBPassword() {
+            return getConfig().get("mongo-db.password", "root");
+    }
+
+    public static String getMongoDBHost() {
+        return getConfig().get("mongo-db.host", "localhost:27017");
     }
 }
