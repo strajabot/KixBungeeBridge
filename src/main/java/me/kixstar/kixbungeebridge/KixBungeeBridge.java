@@ -1,17 +1,22 @@
 package me.kixstar.kixbungeebridge;
 
 import com.google.common.base.Preconditions;
+import me.kixstar.kixbungeebridge.command.home.DelHomeCommand;
 import me.kixstar.kixbungeebridge.command.home.HomeCommand;
 import me.kixstar.kixbungeebridge.command.NickCommand;
 import me.kixstar.kixbungeebridge.command.TpCommand;
+import me.kixstar.kixbungeebridge.database.abstraction.player.KixPlayer;
+import me.kixstar.kixbungeebridge.database.entities.Location;
 import me.kixstar.kixbungeebridge.feature.NicknameService;
 import me.kixstar.kixbungeebridge.feature.ServerCommandService;
 import me.kixstar.kixbungeebridge.feature.teleport.TeleportTransaction;
-import me.kixstar.kixbungeebridge.mongodb.Database;
+import me.kixstar.kixbungeebridge.database.Database;
 import me.kixstar.kixbungeebridge.rabbitmq.RabbitMQ;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 import net.md_5.bungee.api.plugin.Plugin;
+
+import java.util.concurrent.CompletableFuture;
 
 public final class KixBungeeBridge extends Plugin {
 
@@ -41,6 +46,7 @@ public final class KixBungeeBridge extends Plugin {
         this.getProxy().getPluginManager().registerCommand(this, new TpCommand());
         //note: doesn't work yet
         this.getProxy().getPluginManager().registerCommand(this, new HomeCommand());
+        this.getProxy().getPluginManager().registerCommand(this, new DelHomeCommand());
 
     }
 

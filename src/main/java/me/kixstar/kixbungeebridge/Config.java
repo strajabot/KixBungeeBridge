@@ -31,7 +31,7 @@ public class Config {
     }
 
     public static boolean isProd() {
-        return getConfig().getBoolean("environment", false);
+        return (getConfig().getString("environment", "production").equals("production"));
     }
 
     public static String getRabbitMQ() {
@@ -44,15 +44,15 @@ public class Config {
         throw new RuntimeException("Property \"server-handle\" must be provided in the config.yml so the plugin can function properly");
     }
 
-    public static String getMongoDBUsername() {
-        return getConfig().get("mongo-db.username", "admin");
+    public static String getDBUsername() {
+        return getConfig().get("database.username", "admin");
     }
 
-    public static String getMongoDBPassword() {
-            return getConfig().get("mongo-db.password", "root");
+    public static String getDBPassword() {
+        return getConfig().get("database.password", "root");
     }
 
-    public static String getMongoDBHost() {
-        return getConfig().get("mongo-db.host", "localhost:27017");
+    public static String getDBHost() {
+        return getConfig().get("database.host", "jdbc:mysql://localhost:3306/KixServerData");
     }
 }

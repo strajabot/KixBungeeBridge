@@ -1,20 +1,25 @@
-package me.kixstar.kixbungeebridge;
+package me.kixstar.kixbungeebridge.database.entities;
 
 import com.google.common.base.Preconditions;
 import org.jetbrains.annotations.NotNull;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
+import javax.persistence.*;
 
+/**
+ * We can ignore nullable warnings since they are caused by the no-arg constructor which only gets called by Hibernate,
+ * and Hibernate guarantees that all of the columns aren't nullable.
+ */
 @Embeddable
 public class Location {
 
+    @SuppressWarnings("NullableProblems")
     @NotNull
-    @Column(name = "server-name", nullable = false)
+    @Column(name = "server_handle", nullable = false)
     private String serverName;
 
+    @SuppressWarnings("NullableProblems")
     @NotNull
-    @Column(name = "world-name", nullable = false)
+    @Column(name = "world_name", nullable = false)
     private String worldName;
 
     private double x;
@@ -46,10 +51,12 @@ public class Location {
         this.pitch = pitch;
     }
 
+    @NotNull
     public String getServerName() {
         return serverName;
     }
 
+    @NotNull
     public String getWorldName() {
         return worldName;
     }

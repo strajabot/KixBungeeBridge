@@ -1,28 +1,10 @@
-package me.kixstar.kixbungeebridge.mongodb.entities;
+package me.kixstar.kixbungeebridge.database.entities;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
 import java.util.*;
-/*@Entity
-public class Article {
-    @Id
-    @GeneratedValue(generator = "uuid")
-    @GenericGenerator(name = "uuid", strategy = "uuid2")
-    private String articleId;
-
-    private String articleTitle;
-
-    @ManyToOne
-    private Author author;
-
-    // constructors, getters and setters...
-}
-*/
 @Entity
 public class KixPlayerData {
 
@@ -32,22 +14,24 @@ public class KixPlayerData {
     @Nullable
     private String nickname;
 
-    @Nullable
-    @OneToMany
-    private Set<Home> homes;
+    //We can ignore nullable warnings because FetchType.EAGER makes sure it is initialized.
+    @SuppressWarnings("NullableProblems")
+    @NotNull
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch= FetchType.EAGER, mappedBy = "id.ownerUUID")
+    private Set<HomeData> homes;
 
     private int balance;
 
     //UNIX epoch time in seconds when the player first joined the server
-    @Column(name = "first-logged-in")
+    @Column(name = "first_logged_in")
     private Long firstLoggedIn;
 
     //UNIX epoch time in seconds when the player last joined the server
-    @Column(name = "last-logged-in")
+    @Column(name = "last_logged_in")
     private Long lastLoggedIn;
 
     //UNIX epoch time in seconds when the player last left the server
-    @Column(name = "last-logged-out")
+    @Column(name = "last_logged_out")
     private Long lastLoggedOut;
 
     private KixPlayerData() {}
@@ -68,17 +52,18 @@ public class KixPlayerData {
     }
 
     @NotNull
-    public List<Home> getHomes() {
+    public List<HomeData> getHomes() {
         if(this.homes == null) return new ArrayList<>();
-        return new ArrayList<Home>(this.homes);
+        return new ArrayList<>(this.homes);
     }
 
-    public void setHomes(@Nullable List<Home> homes) {
-        //todo: fix :)
-        if (homes == null) {
-            this.homes = null;
+    public void setHomes(@Nullable List<HomeData> homes) {
+        if(homes != null) {
+            //clearing the list and adding elements is used to bypass errors caused by orphanRemoval = true
+            this.homes.clear();
+            this.homes.addAll(homes);
         } else {
-            this.homes = new HashSet<>(homes);
+            this.homes = null;
         }
     }
 

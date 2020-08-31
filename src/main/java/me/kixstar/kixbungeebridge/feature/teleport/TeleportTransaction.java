@@ -2,7 +2,7 @@ package me.kixstar.kixbungeebridge.feature.teleport;
 
 import com.rabbitmq.client.AMQP;
 import me.kixstar.kixbungeebridge.KixBungeeBridge;
-import me.kixstar.kixbungeebridge.Location;
+import me.kixstar.kixbungeebridge.database.entities.Location;
 import me.kixstar.kixbungeebridge.feature.ServerCommandService;
 import me.kixstar.kixbungeebridge.rabbitmq.*;
 import me.kixstar.kixbungeebridge.rabbitmq.teleport.*;

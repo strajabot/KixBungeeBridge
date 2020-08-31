@@ -2,10 +2,9 @@ package me.kixstar.kixbungeebridge.command.home;
 
 import com.google.common.base.Preconditions;
 import me.kixstar.kixbungeebridge.KixBungeeBridge;
-import me.kixstar.kixbungeebridge.Location;
-import me.kixstar.kixbungeebridge.feature.homes.HomeService;
+import me.kixstar.kixbungeebridge.database.entities.Location;
+import me.kixstar.kixbungeebridge.database.abstraction.player.KixPlayer;
 import me.kixstar.kixbungeebridge.feature.teleport.TeleportTransaction;
-import me.kixstar.kixbungeebridge.rabbitmq.teleport.TeleportProtocol;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -14,11 +13,9 @@ import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Level;
 
@@ -76,7 +73,7 @@ public class HomeCommand extends Command {
             return;
         }
 
-        CompletableFuture<Location> getHomeFuture = HomeService.getHome(player.getUniqueId().toString(), homeName);
+        CompletableFuture<Location> getHomeFuture = KixPlayer.get(player.getUniqueId().toString()).getHomeLocation(homeName);
 
         getHomeFuture.whenComplete((location, throwable) -> {
             if(throwable != null) {
@@ -111,7 +108,7 @@ public class HomeCommand extends Command {
             return;
         }
 
-        CompletableFuture<Location> getHomeFuture = HomeService.getHome(target.getUniqueId().toString(), homeName);
+        CompletableFuture<Location> getHomeFuture = KixPlayer.get(target.getUniqueId().toString()).getHomeLocation(homeName);
 
         getHomeFuture.whenComplete((location, throwable) -> {
             if(throwable != null) {
@@ -161,7 +158,6 @@ public class HomeCommand extends Command {
         this.log(Level.SEVERE, errMessage.toString());
 
         player.sendMessage(errMessage);
-        return;
     }
 
     public void selfHomeNotExist(

@@ -1,10 +1,7 @@
 package me.kixstar.kixbungeebridge.feature.warps;
 
 import com.google.common.base.Preconditions;
-import me.kixstar.kixbungeebridge.Location;
-import me.kixstar.kixbungeebridge.mongodb.abstraction.DatabaseLock;
-import me.kixstar.kixbungeebridge.mongodb.abstraction.warp.Warp;
-import me.kixstar.kixbungeebridge.mongodb.entities.WarpData;
+import me.kixstar.kixbungeebridge.database.entities.Location;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,29 +25,7 @@ public class WarpService {
         Preconditions.checkNotNull(location, "Argument \"location\" can't be null");
 
         //todo: implement
-
-        Warp warp = Warp.get(warpName);
-
-        DatabaseLock<WarpData> warpLock = warp.writeLock();
-
-        CompletableFuture<Void> setWarpFuture = CompletableFuture.supplyAsync(() -> {
-            warpLock.lock();
-            WarpData data = new WarpData(
-                    warpName,
-                    visibility,
-                    location
-            );
-            warp.setData(data);
-            warp.updateData();
-            return null;
-        });
-
-        setWarpFuture.whenComplete((r, t) -> {
-            //unlock the object even if the update completes exceptionally
-            warpLock.unlock();
-        });
-
-        return setWarpFuture;
+        return new CompletableFuture<>();
     }
 
 }

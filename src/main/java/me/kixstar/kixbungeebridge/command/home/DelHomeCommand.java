@@ -2,8 +2,9 @@ package me.kixstar.kixbungeebridge.command.home;
 
 import com.google.common.base.Preconditions;
 import me.kixstar.kixbungeebridge.KixBungeeBridge;
-import me.kixstar.kixbungeebridge.feature.homes.HomeNotExistException;
-import me.kixstar.kixbungeebridge.feature.homes.HomeService;
+import me.kixstar.kixbungeebridge.database.abstraction.player.KixPlayer;
+import me.kixstar.kixbungeebridge.database.abstraction.HomeNotExistException;
+
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -68,13 +69,13 @@ public class DelHomeCommand extends Command {
         Preconditions.checkNotNull(player, "Argument \"player\" can't be null");
         Preconditions.checkNotNull(homeName, "Argument \"homeName\" can't be null");
 
-        CompletableFuture<Void> deleteHomeFuture = HomeService.deleteHome(player.getUniqueId().toString(), homeName);
+        CompletableFuture<Void> deleteHomeFuture = KixPlayer.get(player.getUniqueId().toString()).deleteHome(homeName);
 
         deleteHomeFuture.thenAccept((ignore) -> {
             //Home successfully deleted
             TextComponent homeDeleted = new TextComponent();
             homeDeleted.setText(String.format("Home \"%s\" has been deleted successfully", homeName));
-            homeDeleted.setColor(ChatColor.GOLD);
+            homeDeleted.setColor(ChatColor.GREEN);
 
             player.sendMessage(homeDeleted);
         });
@@ -84,7 +85,7 @@ public class DelHomeCommand extends Command {
         * also if an unknown exception is thrown log to console and send
         * a message to the player that the action couldn't be performed
         */
-        deleteHomeFuture.whenComplete((result, ex) -> {
+        deleteHomeFuture.whenComplete((ignore, ex) -> {
             if(ex == null) return;
             if(ex instanceof HomeNotExistException) {
                 this.selfHomeNotExist(player, homeName);
@@ -110,20 +111,7 @@ public class DelHomeCommand extends Command {
             return;
         }
 
-        CompletableFuture<Void> deleteHomeFuture = HomeService.deleteHome(target.getUniqueId().toString(), homeName);
-
-        deleteHomeFuture.thenAccept((ignore) -> {
-            //Home successfully deleted
-            TextComponent homeDeleted = new TextComponent();
-            homeDeleted.setText(String.format("%s's home \"%s\" has been deleted successfully", targetName, homeName));
-            homeDeleted.setColor(ChatColor.GOLD);
-
-            if(sender instanceof ProxiedPlayer) {
-                sender.sendMessage(homeDeleted);
-            } else {
-                this.log(Level.INFO, homeDeleted.getText());
-            }
-        });
+        CompletableFuture<Void> deleteHomeFuture = KixPlayer.get(target.getUniqueId().toString()).deleteHome( homeName);
 
         /* Catch exceptions that can be expected like HomeNotExistException
          * and reformat the messages to be more friendly,
@@ -131,8 +119,18 @@ public class DelHomeCommand extends Command {
          * a message to the player that the action couldn't be performed
          */
         deleteHomeFuture.whenComplete((result, ex) -> {
-            if(ex == null) return;
-            if(ex instanceof HomeNotExistException) {
+            if(ex == null) {
+                //Home successfully deleted
+                TextComponent homeDeleted = new TextComponent();
+                homeDeleted.setText(String.format("%s's home \"%s\" has been deleted successfully", targetName, homeName));
+                homeDeleted.setColor(ChatColor.GREEN);
+
+                if(sender instanceof ProxiedPlayer) {
+                    sender.sendMessage(homeDeleted);
+                } else {
+                    this.log(Level.INFO, homeDeleted.getText());
+                }}
+            else if(ex instanceof HomeNotExistException) {
                 this.targetHomeNotExist(sender, targetName, homeName);
             } else {
                 this.unexpectedError(sender, targetName, homeName, ex);

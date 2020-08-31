@@ -1,4 +1,4 @@
-package me.kixstar.kixbungeebridge.feature.homes;
+package me.kixstar.kixbungeebridge.database.abstraction;
 
 public class HomeNotExistException extends RuntimeException {
 
